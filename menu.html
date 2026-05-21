@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<title>Navegacion con tabs</title>
+	<link rel="stylesheet" href="estilos.css">
+	<link rel="stylesheet" href="font-awesome.css">
+	<link rel="stylesheet" href="objetivos.css">
+	<link rel="stylesheet" href="competencias.css">
+	<link rel="stylesheet" href="introduccion.css">
+	<link rel="stylesheet" href="tema1.css">
+	<link rel="stylesheet" href="queson.css">
+	<link rel="stylesheet" href="paraquesirven.css">
+	<link rel="stylesheet" href="tipos.css">
+	<link rel="stylesheet" href="agrupadas.css">
+	<link rel="stylesheet" href="ejemplo1.css">
+	<link rel="stylesheet" href="ejemplo2.css">
+	<link rel="stylesheet" href="ejemplo3.css">
+	<link rel="stylesheet" href="resumen.css">
+	<link rel="stylesheet" href="interactivaa.css">
+	<link rel="stylesheet" href="lluvia.css">
+	<link rel="stylesheet" href="cuestionario.css">
+	<link rel="stylesheet" href="contextos.css">
+
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script src="main.js"></script>
+    
+    <!-- Actividad interactiva -->.
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --primary: #4a00e0;
+            --primary-light: #8e2de2;
+            --accent: #00d2ff;
+            --success: #00b894;
+            --error: #ff7675;
+            --text-dark: #2d3436;
+            --text-light: #b2bec3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            max-width: 800px;
+        }
+
+        header h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #636e72;
+            font-size: 1.1rem;
+        }
+
+        /* Zona de Avisos y Mensajes */
+        #game-status {
+            height: 30px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .msg-correct { color: var(--success); }
+        .msg-wrong { color: var(--error); }
+
+        /* Contenedor Principal del Juego */
+        .game-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 900px;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .column-title {
+            text-align: center;
+            font-size: 1.3rem;
+            color: var(--primary-light);
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Estilo de las Tarjetas */
+        .item {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 3px solid transparent;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        /* Tarjetas de Conceptos (Izquierda) */
+        .concept-col .item {
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary);
+            background: linear-gradient(to right, #ffffff, #f9f8ff);
+            border-left: 6px solid var(--primary-light);
+        }
+
+        /* Efectos Hover */
+        .item:hover:not(.matched) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(74, 0, 224, 0.15);
+            border-color: var(--accent);
+        }
+
+        /* Estado Seleccionado */
+        .item.selected {
+            background-color: #eef2ff;
+            border-color: var(--primary);
+            transform: scale(1.02);
+        }
+
+        /* Estado Emparejado Correctamente */
+        .item.matched {
+            background-color: #e8f8f5;
+            border: 3px solid var(--success);
+            color: #0e6251 !important;
+            cursor: default;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        .concept-col .item.matched {
+            border-left: 6px solid var(--success);
+        }
+
+        /* Pantalla de Felicitación Final */
+        #victory-card {
+            display: none;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            margin-top: 20px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #victory-card h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        #victory-card p {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .btn-restart {
+            background-color: var(--accent);
+            color: var(--primary);
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-restart:hover {
+            background-color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Responsivo para celulares */
+        @media (max-width: 600px) {
+            .game-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+
+
+
+ <!-- Cuestionario -->.
+
+
+        <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --primary-color: #3498db;
+            --primary-hover: #2980b9;
+            --correct-color: #2ecc71;
+            --correct-bg: #e8f8f0;
+            --incorrect-color: #e74c3c;
+            --incorrect-bg: #fdeaea;
+            --hint-bg: #fef9e7;
+            --hint-border: #f39c12;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 24pt;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #7f8c8d;
+            font-size: 11pt;
+        }
+
+        .quiz-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: #edf2f7;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 10.5pt;
+        }
+
+        .question-card {
+            margin-bottom: 35px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .question-text {
+            font-size: 12pt;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1a202c;
+        }
+
+        .options-list {
+            list-style: none;
+        }
+
+        .option-item {
+            display: block;
+            margin-bottom: 10px;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 11pt;
+            background-color: #fafafa;
+        }
+
+        .option-item:hover {
+            background-color: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        /* Estados de respuesta */
+        .option-item.correct {
+            background-color: var(--correct-bg) !important;
+            border-color: var(--correct-color) !important;
+            color: #155724;
+            font-weight: 600;
+            cursor: default;
+        }
+
+        .option-item.incorrect {
+            background-color: var(--incorrect-bg) !important;
+            border-color: var(--incorrect-color) !important;
+            color: #721c24;
+            cursor: default;
+        }
+
+        .option-item.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* Pistas y Justificaciones */
+        .hint-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 10pt;
+            text-decoration: underline;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .hint-box {
+            display: none;
+            background-color: var(--hint-bg);
+            border-left: 4px solid var(--hint-border);
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+            font-size: 10pt;
+            font-style: italic;
+        }
+
+        .rationale-box {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 10.5pt;
+            font-weight: 500;
+        }
+
+        .rationale-box.show {
+            display: block;
+        }
+
+        .rationale-box.correct-style {
+            background-color: #e8f8f0;
+            border: 1px solid var(--correct-color);
+            color: #155724;
+        }
+
+        .rationale-box.incorrect-style {
+            background-color: #fdeaea;
+            border: 1px solid var(--incorrect-color);
+            color: #721c24;
+        }
+
+        /* Footer / Resultado */
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 12pt;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #result-card {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #ebf8ff;
+            border: 2px solid #90cdf4;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        #result-card h2 {
+            color: #2b6cb0;
+            margin-bottom: 10px;
+        }
+
+        .score-text {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+
+</head>
+<body>
+	<div class="wrap">
+		<ul class="tabs">
+			<li><a href="#tab1"><span class="fa fa-bar-chart"></span><span class="tab-text">Objetivos</span></a></li>
+			<li><a href="#tab2"><span class="fa fa-group"></span><span class="tab-text">Competencias</span></a></li>
+			<li><a href="#tab3"><span class="fa fa-battery-full"></span><span class="tab-text">Introducción</span></a></li>
+			<li><a href="#tab4"><span class="fa fa-book"></span><span class="tab-text">Contenidos multimediales</span></a></li>
+			<li><a href="#tab5"><span class="fa fa-calendar-o"></span><span class="tab-text">Ejemplos</span></a></li>
+			<li><a href="#tab6"><span class="fa fa-check-square-o"></span><span class="tab-text">Actividades formativas de aprendizaje</span></a></li>
+			<li><a href="#tab7"><span class="fa fa-newspaper-o"></span><span class="tab-text">Evaluación</span></a></li>
+			<li><a href="#tab8"><span class="fa fa-server"></span><span class="tab-text">Elementos de contextualización</span></a></li>
+		</ul>
+        <br>
+        <a href="index.html" style="text-decoration: none; display: inline-block;">
+            <button style="background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #ffffff; font-family: sans-serif; font-size: 1.1rem; font-weight: bold; padding: 5px 8px; border: none; border-radius: 50px; cursor: pointer; outline: none; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4); transition: transform 0.2s ease;">
+                De clic para regresar a la página principal
+            </button>
+        </a>  
+
+		<div class="secciones">
+			<article id="tab1">
+				<div class="contenedor-movil1">
+                    <p class="texto-led1 texto-movil1">Objetivos</p>
+                    	<table border="5" width="100%" style="text-align: center;" bgcolor="#FFAB91">
+    						<tbody>
+        						<tr>
+        							<td>
+        								<img src="fonts/Imágenes/objetivo.gif" width="400" height="400">
+        							</td>
+        							<br><br>
+        						</tr>
+        						<tr bgcolor="#D87093">
+        							<td>
+        								<ol>
+					    					<li>
+					    						<p style="color: black; text-align: justify; font-size: 20px;">
+					    							1. Facilitar el aprendizaje sobre el uso y manejo de plataformas en línea a través del ingreso a un entorno web educativo, promoviendo el desarrollo de competencias digitales en los usuarios.
+					    						</p>
+					    	
+					    					</li>
+					    					<br>
+					    					<li>
+					    						<p style="color: black; text-align: justify; font-size: 20px;">
+					    							2. Proveer un espacio web interactivo que permita a los usuarios, al ingresar al sistema, capacitarse y dominar diversas plataformas en línea mediante recursos didácticos integrados.
+					    						</p>
+											</li>
+											<br>
+					    					<li>
+					    						<p style="color: black; text-align: justify; font-size: 20px;">
+					    							3. Capacitar a los usuarios en el conocimiento y uso de plataformas en línea mediante su acceso e interacción con la plataforma web diseñada.
+					    						</p>
+					    					</li>
+                    					</ol>
+        							</td>
+        					</tr>
+    						</tbody>
+						</table>
+                </div>
+					<br>
+					<br>
+					<br>
+			</article>
+			<article id="tab2">
+				<div class="contenedor-movil2">
+					<p class="texto-led2 texto-movil2">Competencias</p>
+                    	<table border="5" width="100%" style="text-align: center;" bgcolor="#D2B48C">
+    						<tbody>
+        						<tr>
+        							<td>
+        								<img src="fonts/Imágenes/competencia.gif" width="400" height="400">
+        							</td>
+        							<br>
+        						</tr>
+        						<tr>
+        							<td bgcolor="#008080">
+        								<ol>
+					    					<li>
+					    						<p style="color: black; text-align: justify; font-size: 20px;">
+					    							1. Utiliza diversos entornos virtuales y herramientas digitales mediante el ingreso y exploración de la plataforma web, con el fin de seleccionar las opciones tecnológicas más adecuadas para su desarrollo personal o profesional, mostrando autonomía en su autoformación.
+					    						</p>
+					    	
+					    					</li>
+					    					<br>
+					   						<li>
+					    						<p style="color: black; text-align: justify; font-size: 20px;">
+					    							2. Analiza las características, funciones y ventajas de diferentes plataformas en línea a través del estudio de los recursos didácticos del sitio web, para evaluar su aplicabilidad en contextos reales de manera crítica y asertiva.
+					    						</p>
+											</li>
+											<br>
+					    					<li>
+					    						<p style="color: black; text-align: justify; font-size: 20px;">
+					    							3. Domina el funcionamiento técnico y pedagógico de las plataformas en línea exploradas, aplicando los conocimientos adquiridos en entornos web prácticos para optimizar procesos de comunicación, aprendizaje o trabajo colaborativo.
+					    						</p>
+					    					</li>
+                    					</ol>
+        							</td>
+        						</tr>
+    						</tbody>
+						</table>
+				</div>
+			</article>
+			<article id="tab3">
+				<div class="contenedor-movil1">
+                    <p class="texto-led1 texto-movil1">Introducción</p>
+                    	<table border="5" width="100%" style="text-align: center;" bgcolor="#48D1CC">
+    						<tbody>
+        						<tr>
+        							<td>
+        								<img src="fonts/Imágenes/intro.gif" width="400" height="400">
+        							</td>
+        						</tr>
+        						<tr>
+        							<td bgcolor="#FA8072">
+        								<p style="color: black; text-align: justify; font-size: 21px;">
+											En la era digital actual, el dominio de los entornos virtuales se ha convertido en una necesidad fundamental para optimizar los procesos de aprendizaje, comunicación y trabajo colaborativo. En este contexto, surge esta plataforma web como un espacio diseñado específicamente para guiar al usuario en el conocimiento, exploración y manejo de las herramientas tecnológicas más relevantes del entorno actual.Al ingresar a este sitio, el usuario encontrará un ecosistema estructurado y dinámico enfocado en el autoaprendizaje de diversas plataformas en línea. A través de un recorrido intuitivo, el espacio ofrece:
+										</p>
+										<br>
+										<br>
+										<ul>
+											<li>
+												<p style="color: black; text-align: justify; font-size: 20px;">
+					    							1. Módulos de Aprendizaje Práctico: Contenidos detallados sobre el funcionamiento técnico y pedagógico de diferentes herramientas virtuales.
+					    						</p>
+					    					</li>
+					    					<br>
+					   						<li>
+					    						<p style="color: black; text-align: justify; font-size: 20px;">
+					    							2. Recursos Didácticos Interactivos: Materiales de apoyo visuales y conceptuales diseñados para facilitar la comprensión de las tecnologías analizadas.
+					    						</p>
+					    					</li>
+					    					<br>
+					    					<li>
+					    						<p style="color: black; text-align: justify; font-size: 20px;">
+					    							3. Evaluación de Competencias: Espacios de reflexión y práctica que permiten medir el nivel de dominio adquirido sobre cada entorno digital.
+					    						</p>
+											</li>
+										</ul>
+        							</td>
+        						</tr>
+    						</tbody>
+						</table>
+                </div>
+			</article>
+			<article id="tab4">
+					<div class="contenedor-movil4">
+						<p class="texto-led4 texto-movil4">Las plataformas de aprendizaje en línea</p>
+					<br>
+					<br>
+					<table border="5" width="100%" style="text-align: center;" bgcolor="#82E0AA">
+    					<tbody>
+        					<tr>
+        						<td>
+        							<div class="contenedor-movil5">
+										<p class="texto-led5 texto-movil5" align="center">¿Qué son? </p>
+								    </div>
+									<br>
+	    								<p style="color: black; text-align: justify; font-size: 23px;">
+											Son entornos virtuales diseñados específicamente para gestionar, impartir, evaluar y hacer el seguimiento de procesos educativos de forma remota a través de internet. Funcionan como un aula digital integrada donde confluyen roles diferenciados (docentes y estudiantes) y se combinan recursos didácticos multimedia con herramientas de comunicación sincrónicas y asincrónicas, permitiendo transformar la enseñanza tradicional en un proceso accesible, flexible y centrado en el desarrollo de competencias tecnológicas de manera autónoma o guiada.
+										</p>
+									<br>
+									<img src="fonts/Imágenes/aplicaciones.gif" width="400" height="400">
+								</td>
+        					</tr>
+    					</tbody>
+					</table>
+					<table border="5" width="100%" style="text-align: center;" bgcolor="#FF69B4">
+    					<tbody>
+        					<tr>
+        						<td>
+        							<div class="contenedor-movil5">
+										<p class="texto-led5 texto-movil5" align="center">¿Para que sirven? </p>
+								    </div>
+									<br>
+	    								<p style="color: black; text-align: justify; font-size: 23px;">
+											Sirven como un aula virtual unificada. Su función principal es centralizar, gestionar y facilitar los procesos de enseñanza y aprendizaje a través de internet, conectando a educadores y estudiantes sin importar la distancia
+									</p>
+									<br>
+									<img src="fonts/Imágenes/sirven.gif" width="400" height="400">
+								</td>
+        					</tr>
+    					</tbody>
+					</table>
+					<table border="5" width="100%" style="text-align: center;" bgcolor="#48D1CC">
+    					<tbody>
+        					<tr>
+        						<td>
+        							<div class="contenedor-movil7">
+										<p class="texto-led7 texto-movil7" align="center"> "Tipos de plataformas" </p>
+								    </div>
+									<br>
+										<p style="color: black; text-align: left; font-size: 23px;">Entre alguanas plataformas más utilizadas se tienen las siguientes:</p>
+										<br><br>
+										<ol style="list-style-type: decimal; padding-left: 30px; text-align: left;">
+											<li> Moodle </li>
+											<li> Google Classroom </li>
+											<li> Canvas LMS </li>
+											<li> Kahoot </li>
+										</ol>
+										<!-- El contenedor que agrupa las imágenes -->
+										<div class="contenedor-imagenes">
+										  <img src="fonts/Imágenes/moodle1.gif" alt="Moodle">
+										  <img src="fonts/Imágenes/google.gif" alt="Google Classroom">
+										  <img src="fonts/Imágenes/canvas.gif" alt="Canvas LMS">
+										  <img src="fonts/Imágenes/kahoot.gif" alt="Kahoot">
+										</div>
+										<br>
+								</td>
+        					</tr>
+    					</tbody>
+					</table>
+					<table border="5" width="100%" style="text-align: center;" bgcolor="#FFFACD">
+    					<tbody>
+        					<tr>
+        						<td>
+									<p >
+										<b>
+											Plataforma Moodle
+										</b>
+									</p>
+									<br>
+									<br>
+									<p style="text-align: justify;">
+										Es un LMS (Learning Management System o Sistema de Gestión de Aprendizaje) diseñado para crear espacios de educación virtuales. Es una herramienta que permite a profesores crear cursos en línea, gestionar contenidos, interactuar con los estudiantes y evaluar su progreso.Es la plataforma que suelen elegir las grandes universidades, centros de educación superior y escuelas debido a su robustez, flexibilidad y a la enorme comunidad global de desarrolladores que la respaldan de forma constante.
+									</p>
+									<br>
+									<img src="fonts/Imágenes/moodle.gif" width="300" height="250" align="center">
+								</td>
+        					</tr>
+    					</tbody>
+					</table>
+					<table border="5" width="100%" style="text-align: center;" bgcolor="#FFE4E1">
+    					<tbody>
+        					<tr>
+        						<td>
+									<p >
+										<b>
+											Google Classroom
+										</b>
+									</p>
+									<br>
+									<br>
+									<p style="text-align: justify;">
+										Es la herramienta reina de la educación híbrida y el aprendizaje invertido (flipped classroom), especialmente en los niveles de educación básica y media. A diferencia de un LMS robusto y complejo como Moodle, Classroom no nació para ser un sistema de administración masivo, sino para ser un organizador del flujo de trabajo del aula.
+									</p>
+									<br>
+									<img src="fonts/Imágenes/google1.gif" width="300" height="250" align="center">
+								</td>
+        					</tr>
+    					</tbody>
+					</table>
+					<table border="5" width="100%" style="text-align: center;" bgcolor="#FFE4B5">
+    					<tbody>
+        					<tr>
+        						<td>
+									<p >
+										<b>
+											Canvas LMS
+										</b>
+									</p>
+									<br>
+									<br>
+									<p style="text-align: justify;">
+										Canvas LMS es actualmente uno de los sistemas de gestión del aprendizaje más potentes y de mayor crecimiento en el mundo, compitiendo directamente en el trono de la educación superior y corporativa con Moodle y Blackboard.El lema indirecto de Canvas siempre ha sido "hacer la tecnología educativa invisible". Se destaca por una interfaz limpia, moderna y responsiva que se adapta perfectamente a dispositivos móviles sin perder funcionalidad.
+									</p>
+									<br>
+									<img src="fonts/Imágenes/canvas1.gif" width="300" height="250" align="center">
+								</td>
+        					</tr>
+    					</tbody>
+					</table>
+					<table border="5" width="100%" style="text-align: center;" bgcolor="#D8BFD8">
+    					<tbody>
+        					<tr>
+        						<td>
+									<p >
+										<b>
+											Kahoot
+										</b>
+									</p>
+									<br>
+									<br>
+									<p style="text-align: justify;">
+										Kahoot! es la plataforma reina de la gamificación educativa (el aprendizaje basado en el juego). A diferencia de Google Classroom o Canvas, que son sistemas de gestión estructural (LMS), Kahoot! es una herramienta de evaluación formativa y dinamización del aula en tiempo real.Es el recurso perfecto para captar la atención de los estudiantes, romper el hielo o repasar conceptos clave antes de un examen formal.
+									</p>
+									<br>
+									<img src="fonts/Imágenes/kahoot1.gif" width="300" height="250" align="center">
+								</td>
+        					</tr>
+    					</tbody>
+					</table>
+					<table border="5" width="100%" style="text-align: center;" bgcolor="#9ACD32">
+    					<tbody>
+        					<tr>
+        						<td>
+									<p style="text-align: center;">
+										<b>
+											Feedback
+										</b>
+									</p>
+									<br>
+									<br>
+									<p style="text-align: justify;">
+										Con la finalidad de reforzar el contenido abordado, se presenta un vídeo interactivo con base al tema: "Plataformas de aprendizaje en línea".
+									</p>
+									<br>
+									<iframe src="https://drive.google.com/file/d/1wAWaPHoEMZ1TDTWk55OBFH05sGir6GPQ/preview" width="640" height="480"></iframe>
+									<br>
+									<br>
+									<p>
+										<em>
+											<b>
+												Vídeo realizado en Notebooklm.
+											</b>
+										</em>
+									</p>
+								</td>
+        					</tr>
+    					</tbody>
+					</table>
+					</div>
+			</article>
+			<br>
+			<article id="tab5">
+				<div class="contenedor-movil8">
+                    <p class="texto-led8 texto-movil8">Estructura de plataformas digitales de aprendizaje</p>
+                    	<table border="5" width="100%" style="text-align: center;" bgcolor="#FF3399">
+    						<tbody>
+        						<tr>
+        							<td>
+        								<iframe src="plataformas.pdf" width="100%" height="500px"></iframe>
+        							</td>
+        						</tr>
+    						</tbody>
+						</table>
+                </div>
+                <br>
+                <br>
+                <br>
+                <div class="contenedor-movil10">
+                    <p class="texto-led10 texto-movil10">Simulación de plataformas digitales de aprendizaje en línea</p>
+                    	<table border="5" width="100%" style="text-align: center;" bgcolor="#9ACD32">
+    						<tbody>
+        						<tr>
+        							<td>
+        								<iframe src="https://drive.google.com/file/d/1NiiOO3UVjTCen0Asj8rHLh05QAzM1FpP/preview" width="640" height="480"></iframe>
+        							</td>
+        						</tr>
+    						</tbody>
+						</table>
+                </div>
+                <br>
+                <br>
+                <br>
+                <br>
+                <div class="contenedor-movil9">
+                    <p class="texto-led9 texto-movil9">Infografía de las plataformas de aprendizaje en línea</p>
+                    	<table border="5" width="100%" style="text-align: center;" bgcolor="#FFC0CB">
+    						<tbody>
+        						<tr>
+        							<td>
+        								<img src="fonts/Imágenes/infografia.png" width="600" height="500" align="center">
+        							</td>
+        						</tr>
+    						</tbody>
+						</table>
+                </div>
+			</article>
+			<br><br>
+			<article id="tab6">
+				<div class="contenedor-movil11">
+										<p class="texto-led11 texto-movil11" align="center"> "Resumen de plataformas en línea". </p>
+				</div>
+				<table border="5" width="100%" style="text-align: center;" bgcolor="#FF69B4">
+    					<tbody>
+        					<tr>
+        						<td>
+        							<br><br>
+        							<audio controls style="width: 80%; max-width: 400px;">
+        								<source src="plataformass.mp3" type="audio/mpeg">
+        							</audio>
+        							<br><br>
+        							<p>
+        								<b>
+        									<em>En los tres puntos puede aumentar la velocidad del audio.</em>
+        								</b>
+        							</p>
+								</td>
+        					</tr>
+    					</tbody>
+					</table>
+					<br><br>
+					<div class="contenedor-movil12">
+										<p class="texto-led12 texto-movil12" align="center">"Actividad interactiva"</p>
+					</div>
+				<table border="5" width="100%" style="text-align: center;" bgcolor="#E9967A">
+    					<tbody>
+        					<tr>
+        						<td>
+        							<header>
+        <h1>Conceptos de Plataformas Digitales</h1>
+        <p>Instrucciones: Seleccione un elemento de la izquierda y emparejelo con su definición correcta a la derecha.</p>
+    </header>
+    <!-- Estado de la jugada actual -->
+    <div id="game-status"></div>
+    <!-- Contenedor del juego -->
+    <div class="game-container" id="main-game">
+        <!-- Columna de Conceptos -->
+        <div class="column concept-col">
+            <div class="column-title">Elementos</div>
+            <div class="item" data-id="funcion" onclick="selectConcept(this)">Función</div>
+            <div class="item" data-id="caracteristicas" onclick="selectConcept(this)">Características</div>
+            <div class="item" data-id="usos" onclick="selectConcept(this)">Usos</div>
+            <div class="item" data-id="utilidades" onclick="selectConcept(this)">Utilidades</div>
+        </div>
+
+        <!-- Columna de Definiciones (Desordenadas para el reto) -->
+        <div class="column definition-col">
+            <div class="column-title">Definiciones</div>
+            <div class="item" data-match="utilidades" onclick="selectDefinition(this)">
+                Los beneficios prácticos, ventajas concretas o el valor agregado que aporta (ej. automatizar tareas, optimizar tiempos, reducir costos).
+            </div>
+            <div class="item" data-match="funcion" onclick="selectDefinition(this)">
+                El propósito principal y la razón de ser de la plataforma; aquello para lo que fue diseñada programáticamente (ej. gestionar datos, conectar usuarios).
+            </div>
+            <div class="item" data-match="usos" onclick="selectDefinition(this)">
+                Las aplicaciones prácticas y los contextos reales donde se implementa la herramienta en el día a día (ej. educación a distancia, comercio electrónico).
+            </div>
+            <div class="item" data-match="caracteristicas" onclick="selectDefinition(this)">
+                Los rasgos distintivos, técnicos y visuales que describen la identidad de la plataforma (ej. interfaz intuitiva, seguridad cifrada, acceso multiusuario).
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta de éxito final -->
+    <div id="victory-card">
+        <h2>¡Excelente Trabajo! 🎉</h2>
+        <p>Has emparejado todos los conceptos sobre plataformas digitales correctamente.</p>
+        <button class="btn-restart" onclick="resetGame()">Jugar de nuevo</button>
+    </div>
+
+    <script>
+        let selectedConcept = null;
+        let matchedCount = 0;
+        const totalMatches = 4;
+
+        const statusDisplay = document.getElementById('game-status');
+        const victoryCard = document.getElementById('victory-card');
+        const gameContainer = document.getElementById('main-game');
+
+        function selectConcept(element) {
+            // Si ya está emparejado, no hacer nada
+            if (element.classList.contains('matched')) return;
+
+            // Quitar selección previa de la columna de conceptos
+            const currentSelected = document.querySelector('.concept-col .item.selected');
+            if (currentSelected) {
+                currentSelected.classList.remove('selected');
+            }
+
+            // Seleccionar el nuevo concepto
+            selectedConcept = element;
+            element.classList.add('selected');
+            clearStatus();
+        }
+
+        function selectDefinition(element) {
+            // Si ya está emparejado o no se ha seleccionado un concepto primero, ignorar
+            if (element.classList.contains('matched')) return;
+            if (!selectedConcept) {
+                statusDisplay.textContent = "Primero selecciona un elemento de la izquierda";
+                statusDisplay.className = "msg-wrong";
+                return;
+            }
+
+            // Validar coincidencia
+            const conceptId = selectedConcept.getAttribute('data-id');
+            const definitionMatchId = element.getAttribute('data-match');
+
+            if (conceptId === definitionMatchId) {
+                // ¡CORRECTO!
+                selectedConcept.classList.remove('selected');
+                selectedConcept.classList.add('matched');
+                element.classList.add('matched');
+                
+                statusDisplay.textContent = "¡Correcto! ✨";
+                statusDisplay.className = "msg-correct";
+                
+                selectedConcept = null;
+                matchedCount++;
+
+                // Verificar si terminó el juego
+                if (matchedCount === totalMatches) {
+                    setTimeout(showVictory, 600);
+                }
+            } else {
+                // ¡INCORRECTO!
+                statusDisplay.textContent = "Inténtalo de nuevo ❌";
+                statusDisplay.className = "msg-wrong";
+                
+                // Quitamos la selección visual del concepto para que lo intente otra vez
+                selectedConcept.classList.remove('selected');
+                selectedConcept = null;
+            }
+        }
+
+        function clearStatus() {
+            statusDisplay.textContent = "";
+            statusDisplay.className = "";
+        }
+
+        function showVictory() {
+            gameContainer.style.display = 'none';
+            statusDisplay.style.display = 'none';
+            victoryCard.style.display = 'block';
+        }
+
+        function resetGame() {
+            matchedCount = 0;
+            selectedConcept = null;
+            clearStatus();
+            
+            // Reestablecer clases de las tarjetas
+            document.querySelectorAll('.item').forEach(item => {
+                item.classList.remove('selected', 'matched');
+            });
+
+            // Volver a mostrar la pantalla de juego
+            victoryCard.style.display = 'none';
+            gameContainer.style.display = 'flex';
+            statusDisplay.style.display = 'block';
+            
+            // Opcional: Desordenar las definiciones dinámicamente al reiniciar
+            shuffleDefinitions();
+        }
+
+        function shuffleDefinitions() {
+            const container = document.querySelector('.definition-col');
+            const items = Array.from(container.querySelectorAll('.item'));
+            // Removerlos temporalmente
+            items.forEach(item => container.removeChild(item));
+            // Mezclar el array
+            items.sort(() => Math.random() - 0.5);
+            // Volver a añadirlos
+            items.forEach(item => container.appendChild(item));
+        }
+
+        // Ejecutar mezcla inicial al cargar la página para que no aparezcan siempre igual
+        window.onload = shuffleDefinitions;
+    </script>
+
+								</td>
+        					</tr>
+    					</tbody>
+					</table>
+					<br><br>
+					<div class="contenedor-movil13">
+										<p class="texto-led13 texto-movil13" align="center"> "Lluvia de ideas plataformas en línea". </p>
+				</div>
+				<table border="5" width="100%" style="text-align: center;" bgcolor="#800000">
+    					<tbody>
+        					<tr>
+        						<td>
+        							<br><br>
+        							<img src="fonts/Imágenes/infografia.png" width="700" height="500" align="center">
+        						</td>
+        					</tr>
+    					</tbody>
+					</table>
+			</article>
+			<article id="tab7">
+				<div class="contenedor-movil12">
+					<p class="texto-led12 texto-movil12" align="center">"Evaluación interactiva"</p>
+				</div>
+				<table border="5" width="100%" style="text-align: center;" bgcolor="#9ACD32">
+    						<tbody>
+        						<tr>
+        							<td>
+        								<div class="container">
+    <header>
+        <h1>Cuestionario: Plataformas Educativas</h1>
+        <p class="description">Demuestre sus conocimientos sobre Moodle, Google Classroom, Kahoot y Canva LMS</p>
+    </header>
+
+    <div class="quiz-info">
+        <span>Total: 10 Preguntas</span>
+        <span id="progress-tracked">Respondidas: 0 / 10</span>
+    </div>
+
+    <div id="quiz-form">
+        </div>
+
+    <div class="actions">
+        <button type="button" class="btn-submit" onclick="calculateFinalScore()">Finalizar Cuestionario</button>
+    </div>
+
+    <div id="result-card">
+        <h2>¡Cuestionario Completado!</h2>
+        <p class="score-text" id="score-display">Su puntuación: 0 / 10</p>
+        <p id="feedback-message" style="margin-top: 10px; font-weight: 500;"></p>
+    </div>
+</div>
+
+<script>
+const quizData = [
+  {
+    "question": "1. Un profesor quiere organizar una sesión de repaso altamente dinámica y gamificada en tiempo real antes de un examen escrito. ¿Qué herramienta es la más adecuada para este propósito específico?",
+    "hint": "Busca la herramienta que utiliza mecánicas de juego, temporizadores y podios de puntuación en vivo para fomentar la participación.",
+    "answers": [
+      { "text": "Kahoot", "isCorrect": true, "rationale": "¡Correcto! Su núcleo de diseño está basado en el juego y la competencia en tiempo real, ideal para repasos interactivos y motivadores." },
+      { "text": "Moodle", "isCorrect": false, "rationale": "Incorrecto. Permite crear cuestionarios muy robustos, pero su enfoque está orientado a la evaluación formativa o sumativa formal, no a la gamificación síncrona inmediata." },
+      { "text": "Google Classroom", "isCorrect": false, "rationale": "Incorrecto. Funciona principalmente como un centro de gestión del aprendizaje para asignar tareas y compartir recursos, careciendo de dinámicas de juego síncronas nativas." },
+      { "text": "Canva LMS", "isCorrect": false, "rationale": "Incorrecto. Aunque permite diseñar presentaciones interactivas y recursos visuales, no está estructurada como una plataforma de juego de preguntas y respuestas en directo." }
+    ]
+  },
+  {
+    "question": "2. Una universidad requiere un entorno de aprendizaje virtual que permita una personalización extrema del código, instalación en servidores propios y una gestión de roles de usuario muy avanzada. ¿Qué plataforma cumple mejor con estos requisitos institucionales?",
+    "hint": "Piensa en la plataforma de código abierto (open-source) más extendida a nivel mundial en la educación superior debido a su modularidad.",
+    "answers": [
+      { "text": "Google Classroom", "isCorrect": false, "rationale": "Incorrecto. Es un entorno cerrado de software como servicio (SaaS) donde las instituciones no pueden modificar el código base ni alojarlo localmente." },
+      { "text": "Moodle", "isCorrect": true, "rationale": "¡Correcto! Al ser un sistema de gestión de aprendizaje (LMS) de código abierto, ofrece total flexibilidad para modificar su código, gestionar permisos detallados e instalarlo en servidores privados." },
+      { "text": "Kahoot", "isCorrect": false, "rationale": "Incorrecto. Es una plataforma web comercial enfocada en actividades lúdicas puntuales, no un sistema integral de gestión universitaria de código abierto." },
+      { "text": "Canva LMS", "isCorrect": false, "rationale": "Incorrecto. Está diseñada principalmente para la creación visual y la gestión ligera de cursos, operando bajo un modelo cerrado en la nube sin acceso al código fuente." }
+    ]
+  },
+  {
+    "question": "3. Un docente desea que sus alumnos colaboren en tiempo real en la creación de un portafolio digital visualmente atractivo y con herramientas de diseño profesional integradas. ¿Qué plataforma destaca sobre las demás en este aspecto?",
+    "hint": "Esta plataforma nació como una herramienta de diseño gráfico antes de expandir sus funciones hacia la gestión de aulas y flujos educativos.",
+    "answers": [
+      { "text": "Moodle", "isCorrect": false, "rationale": "Incorrecto. A pesar de tener foros y wikis, sus capacidades nativas de diseño gráfico y maquetación visual son limitadas y técnicas." },
+      { "text": "Google Classroom", "isCorrect": false, "rationale": "Incorrecto. Se conecta bien con Google Slides o Docs, pero no ofrece un banco masivo de plantillas, recursos gráficos y edición visual avanzada integrada." },
+      { "text": "Canva LMS", "isCorrect": true, "rationale": "¡Correcto! Fusiona el potencial del diseño gráfico interactivo de su suite con funciones de gestión del aprendizaje, permitiendo flujos de trabajo creativos y visuales en equipo." },
+      { "text": "Kahoot", "isCorrect": false, "rationale": "Incorrecto. Está limitada a formatos de preguntas y respuestas fijas, por lo que no sirve para la creación de portafolios o proyectos de diseño complejos." }
+    ]
+  },
+  {
+    "question": "4. Si una escuela primaria ya utiliza de forma masiva el ecosistema de Google Workspace (Docs, Sheets, Drive y Meet), ¿cuál es la opción con la curva de aprendizaje más baja y la integración más fluida para el profesorado?",
+    "hint": "Identifica cuál de estas plataformas pertenece a la misma empresa creadora de Gmail y Google Drive.",
+    "answers": [
+      { "text": "Google Classroom", "isCorrect": true, "rationale": "¡Correcto! Está diseñada específicamente para conectarse de manera transparente y automática con todas las herramientas de Google Workspace." },
+      { "text": "Moodle", "isCorrect": false, "rationale": "Incorrecto. Requiere la instalación de plugins de terceros y configuraciones complejas por parte del administrador para integrarse con las herramientas de Google." },
+      { "text": "Kahoot", "isCorrect": false, "rationale": "Incorrecto. Aunque permite iniciar sesión con cuentas de Google, no sirve para gestionar las tareas, archivos y calificaciones del día a día escolar." },
+      { "text": "Canva LMS", "isCorrect": false, "rationale": "Incorrecto. Tiene integraciones útiles, pero al ser un entorno externo requiere un proceso de adaptación independiente comparado con la solución nativa de Google." }
+    ]
+  },
+  {
+    "question": "5. Al crear un juego en Kahoot, ¿qué modo de entrega permite a los alumnos completar el cuestionario de manera asíncrona a su propio ritmo, ideal para asignarlo como tarea en casa?",
+    "hint": "Se trata de la opción que genera un enlace o código de acceso temporal en el que el temporizador corre de forma individual para cada jugador.",
+    "answers": [
+      { "text": "Modo Presentación (Live)", "isCorrect": false, "rationale": "Incorrecto. Este modo proyecta las preguntas en una pantalla central y requiere que todos los participantes respondan de manera síncrona." },
+      { "text": "Modo Desafío (Asignar / Challenge)", "isCorrect": true, "rationale": "¡Correcto! Este modo permite establecer una fecha límite para que cada estudiante acceda y responda de forma independiente desde su dispositivo." },
+      { "text": "Modo Team vs Team", "isCorrect": false, "rationale": "Incorrecto. Está diseñado para agrupar alumnos de manera síncrona en el aula física compartiendo dispositivos." },
+      { "text": "Modo Examen Estricto", "isCorrect": false, "rationale": "Incorrecto. No existe un modo nativo con ese nombre enfocado en tareas asíncronas dentro de la estructura estándar de Kahoot." }
+    ]
+  },
+  {
+    "question": "6. En la plataforma Moodle, ¿cuál es la diferencia principal entre un 'Recurso' y una 'Actividad'?",
+    "hint": "Piensa en el rol del estudiante: en uno solo consume información (ej. un PDF) y en el otro debe resolver o participar (ej. un foro).",
+    "answers": [
+      { "text": "Los Recursos se evalúan automáticamente y las Actividades requieren calificación manual obligatoria.", "isCorrect": false, "rationale": "Incorrecto. Muchas actividades en Moodle, como los cuestionarios, se pueden autoevaluar por completo sin intervención del docente." },
+      { "text": "Los Recursos son elementos de información estáticos para leer o ver, mientras que las Actividades requieren una interacción activa o respuesta del estudiante.", "isCorrect": true, "rationale": "¡Correcto! Los recursos (páginas, archivos) sirven para transmitir contenido, mientras que las actividades (tareas, foros, cuestionarios) esperan que el alumno produzca o interactúe." },
+      { "text": "Las Actividades son exclusivas para los profesores y los Recursos son solo para el alumnado.", "isCorrect": false, "rationale": "Incorrecto. Ambos elementos configuran el aula virtual y son accesibles por los estudiantes, variando solo su finalidad didáctica." },
+      { "text": "No existe diferencia alguna, son sinónimos dentro de la arquitectura de bloques de Moodle.", "isCorrect": false, "rationale": "Incorrecto. Moodle divide claramente su selector de contenidos en estas dos categorías conceptuales para organizar el diseño pedagógico." }
+    ]
+  },
+  {
+    "question": "7. Estás utilizando Canva LMS y quieres evaluar el diseño de una infografía entregada por un alumno utilizando criterios detallados y transparentes. ¿Qué función integrada facilita este proceso?",
+    "hint": "Es una herramienta de evaluación formativa común en los LMS que desglosa los niveles de logro para una tarea o proyecto.",
+    "answers": [
+      { "text": "La rúbrica de evaluación integrada", "isCorrect": true, "rationale": "¡Correcto! Permite asociar una matriz de valoración detallada directamente a la tarea asignada para calificar de forma objetiva dentro del flujo visual." },
+      { "text": "El generador automático de inteligencia artificial de Kahoot", "isCorrect": false, "rationale": "Incorrecto. Kahoot es una plataforma externa totalmente diferente y no gestiona el módulo de rúbricas internas de Canva LMS." },
+      { "text": "La hoja de cálculo externa de Google vinculada por enlace", "isCorrect": false, "rationale": "Incorrecto. Aunque se puede usar un enlace externo, Canva LMS ya cuenta con herramientas nativas para evaluar sin necesidad de salir del sistema." },
+      { "text": "El calificador en código HTML puro", "isCorrect": false, "rationale": "Incorrecto. La plataforma está orientada a interfaces visuales intuitivas (drag-and-drop), no exige que el docente programe código para calificar." }
+    ]
+  },
+  {
+    "question": "8. En Google Classroom, ¿qué sucede automáticamente en el Google Drive del profesor and del alumno cuando se crea una tarea donde se selecciona 'Hacer una copia para cada alumno'?",
+    "hint": "Esta función evita el trabajo manual de duplicar plantillas y previene que los estudiantes vean o editen el trabajo de sus compañeros.",
+    "answers": [
+      { "text": "Se genera un archivo único compartido donde todos los alumnos editan a la vez la misma página.", "isCorrect": false, "rationale": "Incorrecto. Ese comportamiento corresponde a la opción 'Los alumnos pueden editar el archivo', no a la creación de copias individuales." },
+      { "text": "Se crea un documento individual para cada alumno en una carpeta específica de Classroom en Drive, renombrado automáticamente con el nombre del estudiante.", "isCorrect": true, "rationale": "¡Correcto! Classroom automatiza la distribución y nomenclatura de los archivos individuales dentro de carpetas organizadas en Google Drive." },
+      { "text": "Los archivos se descargan en el almacenamiento local de la computadora de cada usuario en formato PDF.", "isCorrect": false, "rationale": "Incorrecto. La integración se realiza directamente en la nube de Google Drive y mantiene los formatos originales editables." },
+      { "text": "El documento original se elimina del Drive del profesor para evitar plagios.", "isCorrect": false, "rationale": "Incorrecto. El archivo plantilla original del profesor permanece intacto y seguro en su unidad de Google Drive." }
+    ]
+  },
+  {
+    "question": "9. Si necesitas asegurar que tu plataforma educativa cumpla de forma estricta con normativas internacionales de accesibilidad (como WCAG 2.1) and estándares de interoperabilidad (como LTI y SCORM), ¿cuál es la opción idónea?",
+    "hint": "Se trata de la plataforma de e-learning más veterana de la lista, ampliamente certificada para la formación corporativa y universitaria formal.",
+    "answers": [
+      { "text": "Kahoot", "isCorrect": false, "rationale": "Incorrecto. Tiene limitaciones estructurales al no estar diseñada como un repositorio formal de paquetes SCORM ni soportar flujos LTI complejos." },
+      { "text": "Moodle", "isCorrect": true, "rationale": "¡Correcto! Es un LMS corporativo y académico diseñado específicamente para soportar paquetes SCORM, estándares LTI y estrictas pautas globales de accesibilidad." },
+      { "text": "Google Classroom", "isCorrect": false, "rationale": "Incorrecto. Aunque es accesible, su soporte nativo directo para paquetes SCORM es muy limitado o nulo sin add-ons de pago específicos." },
+      { "text": "Canva LMS", "isCorrect": false, "rationale": "Incorrecto. Se enfoca en la flexibilidad visual y flujos creativos rápidos, careciendo del robusto motor de empaquetado e-learning tradicional que tiene un LMS maduro." }
+    ]
+  },
+  {
+    "question": "10. Un profesor quiere recolectar ideas previas de forma anónima y rápida al inicio de una clase presencial para romper el hielo. ¿Qué combinación de herramientas o función ofrece la mejor experiencia ágil?",
+    "hint": "Busca la función visual que agrupa los términos más repetidos por los alumnos ampliando su tamaño en la pantalla principal.",
+    "answers": [
+      { "text": "Configurar un curso nuevo completo en Moodle con matriculación externa obligatoria.", "isCorrect": false, "rationale": "Incorrecto. Este proceso es demasiado lento y burocrático para una actividad de inicio rápido en una sesión de clase presencial." },
+      { "text": "Utilizar una pregunta de tipo 'Nube de palabras' (Word Cloud) en Kahoot.", "isCorrect": true, "rationale": "¡Correcto! Las nubes de palabras de Kahoot permiten respuestas rápidas y visuales desde el móvil que se muestran al instante de forma agregada en la pantalla del aula." },
+      { "text": "Crear una tarea con rúbrica calificada en Canva LMS.", "isCorrect": false, "rationale": "Incorrecto. Las tareas con rúbricas están diseñadas para evaluaciones profundas y entregas formales, no para dinámicas síncronas de dos minutos." },
+      { "text": "Programar una videollamada de Google Meet agendada en Google Calendar.", "isCorrect": false, "rationale": "Incorrecto. Si la clase ya es presencial, iniciar una videollamada añade una barrera técnica innecesaria en lugar de agilizar la participación." }
+    ]
+  }
+];
+
+let userScores = new Array(quizData.length).fill(null);
+
+function renderQuiz() {
+    const container = document.getElementById('quiz-form');
+    container.innerHTML = '';
+
+    quizData.forEach((q, qIndex) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.id = `q-card-${qIndex}`;
+
+        let optionsHTML = '';
+        q.answers.forEach((ans, aIndex) => {
+            optionsHTML += `
+                <li class="option-item" 
+                    id="opt-${qIndex}-${aIndex}" 
+                    onclick="selectOption(${qIndex}, ${aIndex}, ${ans.isCorrect})">
+                    ${ans.text}
+                </li>
+            `;
+        });
+
+        card.innerHTML = `
+            <div class="question-text">${q.question}</div>
+            <button type="button" class="hint-btn" onclick="toggleHint(${qIndex})">💡 Ver pista</button>
+            <div class="hint-box" id="hint-${qIndex}">${q.hint}</div>
+            <ul class="options-list">${optionsHTML}</ul>
+            <div class="rationale-box" id="rationale-${qIndex}"></div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function toggleHint(qIndex) {
+    const hBox = document.getElementById(`hint-${qIndex}`);
+    hBox.style.display = (hBox.style.display === 'block') ? 'none' : 'block';
+}
+
+function selectOption(qIndex, aIndex, isCorrect) {
+    if (userScores[qIndex] !== null) return;
+
+    userScores[qIndex] = isCorrect ? 1 : 0;
+    updateProgress();
+
+    const selectedOptionEl = document.getElementById(`opt-${qIndex}-${aIndex}`);
+    const rationaleBox = document.getElementById('rationale-' + qIndex);
+    const targetAnswer = quizData[qIndex].answers[aIndex];
+
+    if (isCorrect) {
+        selectedOptionEl.classList.add('correct');
+        rationaleBox.innerHTML = targetAnswer.rationale;
+        rationaleBox.className = "rationale-box show correct-style";
+    } else {
+        selectedOptionEl.classList.add('incorrect');
+        rationaleBox.innerHTML = targetAnswer.rationale;
+        rationaleBox.className = "rationale-box show incorrect-style";
+
+        quizData[qIndex].answers.forEach((ans, idx) => {
+            if (ans.isCorrect) {
+                document.getElementById(`opt-${qIndex}-${idx}`).classList.add('correct');
+            }
+        });
+    }
+
+    quizData[qIndex].answers.forEach((_, idx) => {
+        document.getElementById(`opt-${qIndex}-${idx}`).classList.add('disabled');
+    });
+}
+
+function updateProgress() {
+    const answeredCount = userScores.filter(s => s !== null).length;
+    document.getElementById('progress-tracked').innerText = `Respondidas: ${answeredCount} / ${quizData.length}`;
+}
+
+function calculateFinalScore() {
+    const answeredCount = userScores.filter(s => s !== null).length;
+    
+    if (answeredCount < quizData.length) {
+        alert("Por favor, responde todas las preguntas antes de finalizar el cuestionario.");
+        return;
+    }
+
+    const totalScore = userScores.reduce((acc, curr) => acc + (curr || 0), 0);
+    const scoreDisplay = document.getElementById('score-display');
+    const feedbackMessage = document.getElementById('feedback-message');
+    const resultCard = document.getElementById('result-card');
+
+    scoreDisplay.innerText = `Su puntuación: ${totalScore} / ${quizData.length}`;
+
+    if (totalScore === 10) {
+        feedbackMessage.innerText = "¡Excelente! Tiene un dominio absoluto de las plataformas evaluadas.";
+        feedbackMessage.style.color = "#2ecc71";
+    } else if (totalScore >= 7) {
+        feedbackMessage.innerText = "¡Buen trabajo! Tiene bases sólidas, aunque puedes afinar algunos conceptos.";
+        feedbackMessage.style.color = "#2c3e50";
+    } else {
+        feedbackMessage.innerText = "Siga practicando. Lea las justificaciones de sus errores para mejorar.";
+        feedbackMessage.style.color = "#e74c3c";
+    }
+
+    resultCard.style.display = 'block';
+    resultCard.scrollIntoView({ behavior: 'smooth' });
+}
+
+window.onload = renderQuiz;
+</script>
+
+        							</td>
+        						</tr>
+    						</tbody>
+						</table>
+			</article>
+			<article id="tab8">
+				<div class="contenedor-movil15">
+                    <p class="texto-led15 texto-movil15">"Elementos de contextualización"</p>
+                    	<table border="5" width="100%" style="text-align: center;" bgcolor="#48D1CC">
+    						<tbody>
+        						<tr>
+        							<td>
+        								<br>
+        								<p style="text-align: center;">
+        									<b>Asignatura:</b>
+        								<p style="text-align: center; font-weight: bold; color: purple;">Diseño de entornos virtuales</p>
+    									</p>
+    									<br>
+        							</td>
+        						</tr>
+        						<tr>
+        							<td bgcolor="#FA8072">
+        								<br>
+        									<p style="text-align: center;">
+        									<b>Tema de Ova:</b>
+        									<p style="text-align: center; font-weight: bold; color: gold;">Plataformas de Aprendizaje en línea</p>
+    									</p>
+										<br>
+        							</td>
+        						</tr>
+        						<tr>
+        							<td bgcolor="#F0E68C">
+        								<br>
+        									<p style="text-align: center;">
+        									<b>Palabras clave:</b>
+        									<p>
+        										<!-- Aplicamos el centrado a toda la lista y a cada elemento interno -->
+												<ol type="1" style="text-align: center; list-style-position: inside; font-size: 16px; color: #8B0000; padding: 0;">
+												    <li style="font-weight: bold; margin-bottom: 8px;">Plataformas</li>
+												    <li style="font-weight: bold; margin-bottom: 8px;">Herramientas</li>
+												    <li style="font-weight: bold; margin-bottom: 8px;">Aprendizaje</li>
+												    <li style="font-weight: bold; margin-bottom: 8px;">Innovación</li>
+												    <li style="font-weight: bold; margin-bottom: 8px;">Educación en línea</li>
+												</ol>
+        									</p>
+    									</p>
+										<br>
+        							</td>
+        						</tr>
+        						<tr>
+        							<td bgcolor="#E6E6FA">
+        								<br>
+        									<p style="text-align: center;">
+        									<b>Licencia Creative Commons</b>
+        									<br><br>
+                                            <img src="fonts/Imágenes/licencia1.jpg" width="600" height="300" align="center">
+                                            <br><br>
+        									<img src="fonts/Imágenes/licencia.jpg" width="300" height="500" align="center">
+    									</p>
+										<br>
+        							</td>
+        						</tr>
+                                <tr>
+        						<td bgcolor="#FF69B4">
+                                        <br>
+                                            <p style="text-align: center;">
+                                            <b>Autor:</b>
+                                            <p style="text-align: center; font-weight: bold; color: brown;">Moisés Ezequiel Paz Guzmán</p>
+                                        </p>
+                                        <br>
+                                    </td>
+                                </tr>
+                                    <td bgcolor="#FFE4B5">
+                                        <br>
+                                            <p style="text-align: center;">
+                                            <b>Fecha de elaboración:</b>
+                                            <p style="text-align: center; font-weight: bold; color: purple;">Guatemala, 21 de mayo de 2026</p>
+                                        </p>
+                                        <br>
+                                    </td>
+                                </tr>
+    						</tbody>
+						</table>
+				</div>
+			</article>
+		</div>
+	</div>
+	<br><br>
+</body>
+</html>
+<!--<p style="color: black; text-align: justify; font-size: 23px;"-->.

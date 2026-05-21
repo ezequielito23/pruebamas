@@ -1,0 +1,33 @@
+
+.contenedor-movil9 {
+  width: 100%;
+  overflow: hidden; 
+}
+
+/* 1. EFECTO LED (Brillo Verde) */
+.texto-led9 {
+  font-family: 'Arial', sans-serif;
+  color: #F4A460;  /*color de letra*/
+  font-size: 35px;
+  text-transform: uppercase;
+  text-shadow: 
+    0 0 5px #F4A460,
+    0 0 10px #F4A460,
+    0 0 20px #FFD700,
+    0 0 40px #F4A460;
+}
+
+/* 2. EFECTO MOVIMIENTO */
+.texto-movil9 {
+  white-space: nowrap; 
+  animation: marquesina 12s linear infinite;
+}
+
+@keyframes marquesina {
+  0% {
+    transform: translateX(100%); 
+  }
+  100% {
+    transform: translateX(-100%); 
+  }
+}

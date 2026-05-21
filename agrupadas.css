@@ -1,0 +1,13 @@
+<style>
+  .contenedor-imagenes {
+    display: flex;            /* Activa Flexbox */
+    justify-content: space-between; /* Distribuye las imágenes con espacio uniforme entre ellas */
+    gap: 10px;                /* Añade un espacio firme de 10px entre cada imagen */
+  }
+
+  .contenedor-imagenes img {
+    width: 20%;               /* Cada imagen ocupa casi una cuarta parte de la línea */
+    height: auto;             /* Mantiene la proporción original de la imagen sin deformarla */
+    object-fit: cover;        /* Si recortas la imagen, evita que se estire */
+  }
+</style>

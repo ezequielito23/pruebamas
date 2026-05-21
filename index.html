@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataformas digitales</title>
+    <style>
+        body {
+            background-color: #0a0a0f; /* Fondo oscuro para resaltar la luz */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .texto-led {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #ffffff;
+            text-align: center;
+            
+            /* Efecto de luz LED / Título de la página */
+            text-shadow: 
+                0 0 5px #03e9f4, 
+                0 0 25px #03e9f4, 
+                0 0 50px #03e9f4, 
+                0 0 100px #03e9f4;
+            
+            /* Animación de parpadeo suave */
+            animation: parpadeo 1.5s infinite alternate;
+        }
+
+        /* Animación para dar el efecto de luz viva */
+        @keyframes parpadeo {
+            0% {
+                text-shadow: 
+                    0 0 2px #03e9f4, 
+                    0 0 10px #03e9f4, 
+                    0 0 20px #03e9f4, 
+                    0 0 50px #03e9f4;
+            }
+            100% {
+                text-shadow: 
+                    0 0 5px #03e9f4, 
+                    0 0 25px #03e9f4, 
+                    0 0 50px #03e9f4, 
+                    0 0 100px #03e9f4;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="texto-led">Plataformas digitales en línea
+        <br>
+        <a href="menu.html" style="text-decoration: none; display: inline-block;">
+            <button style="background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #ffffff; font-family: sans-serif; font-size: 1.1rem; font-weight: bold; padding: 35px 60px; border: none; border-radius: 50px; cursor: pointer; outline: none; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4); transition: transform 0.2s ease;">
+                De clic para ir a la siguiente página
+            </button>
+        </a>  
+    </div>
+</html>
